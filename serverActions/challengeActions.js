@@ -1,20 +1,42 @@
-import { BASE_URL, API_BASE_URL } from "../constants.js";
-import { allCourseData } from "../store/allCourses.js";
-import { pause } from "../utils.js";
+import { BASE_URL, API_BASE_URL, dev_cookie } from "../constants.js";
+import { jsonReader } from "../dbActions/utils.js";
+import rootDir from "app-root-path";
+import { pause } from "../utils/utils.js";
 import axios from "axios";
 
-export function getAllCourseChallenges() {
-  allCourseData.forEach((item) => {
+const COURSES_STORE = rootDir.resolve("/store/allCourses.json");
+
+export function getAllCourseChallenges(coursePath) {
+  return new Promise((resolve, reject) => {
+    if (coursePath) {
+      fetchCourseChallenges(coursePath).then((singleCourseChallenges) => {
+        resolve(singleCourseChallenges);
+      });
+    } else {
+      jsonReader(COURSES_STORE, async (err, courses) => {
+        if (err) reject(err);
+        Promise.all(
+          courses.map((course) => {
+           return pause(100).then(() => fetchCourseChallenges(course.path));
+          })
+        ).then((allCoursesChallenges) => resolve(allCoursesChallenges));
+      });
+    }
+  });
+}
+
+async function fetchCourseChallenges(coursePath) {
+  return new Promise((resolve, reject) => {
     axios
-      .get(`${BASE_URL}${item.path}`, {
+      .get(`${BASE_URL}${coursePath}`, {
         headers: {
-          Cookie:
-            "gbuuid=9eaad644-37cd-4e65-844b-39519d6a0f8e; jwt_access_token=s%3AeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NUb2tlbiI6eyJpZCI6IlFXUVN3VXVZcG9Ib1dqNnVOYkZQelpEZnREclpCVVh5WTFwcE9tOUVadlZiNE5vZHV3eU9TVkpqcnZlZkZyTksiLCJ0dGwiOjc3NzYwMDAwMDAwLCJjcmVhdGVkIjoiMjAyNC0wMi0yMFQxOToyMjoxMi43ODNaIiwidXNlcklkIjoiNjVkNGZiZTRhMDY0Nzg0MzM5NzJiMjE2In0sImlhdCI6MTcwODQ1NjkzMn0.HzfIYr3QLj-7vUghyypKcCx-IKb24Q99RGPEhjZMmBQ.wMmY9142%2FdlClx2qLLJkZa3P9qYdn2uDOth7B7iHCrE; __stripe_mid=cda7bc54-5b09-4a54-a9d2-d4f6cd0c2f4c6a3d63; _csrf=ybIi2s_uU3Gv3uR0Tqy6S7MR; csrf_token=ZNliZYtZ-CBLf9MArnKrHLHYnIexcKDqxKY8; __stripe_sid=713c5098-8522-4785-af79-9652e832de2aa6a098",
+          Cookie: dev_cookie,
           "Content-Type": "application/json",
         },
       })
       .then((resp) => {
         const data = resp.data.result.data;
+        const courseTitle = data.markdownRemark.frontmatter.title;
         const allChallenges = data.allChallengeNode.edges.map((ele) => {
           const challenge = ele.node.challenge;
           return {
@@ -26,19 +48,21 @@ export function getAllCourseChallenges() {
           };
         });
         const finalObj = {
-          courseTitle: item.title,
-          coursePath: item.path,
+          courseTitle: courseTitle,
+          coursePath: coursePath,
           allChallenges,
         };
-        console.log(finalObj);
+        resolve(finalObj);
       })
-      .catch((err) => console.log(err));
-    pause(100);
+      .catch((err) => reject(err));
   });
 }
 
-
-
+// test the function
+// (async () => {
+//   const allChallenges = await getAllCourseChallenges();
+//   console.log(allChallenges);
+// })();
 
 export function completeChallenge() {
   const challengeCompletePath = "/modern-challenge-completed";
@@ -76,6 +100,6 @@ export function completeChallenge() {
       }
     )
     .then((resp) => {
-      if(resp.data) console.log("challenge completed.");
+      if (resp.data) console.log("challenge completed.");
     });
 }
