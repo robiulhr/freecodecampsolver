@@ -4,9 +4,9 @@ export default async function isAuthenticated(req, res, next) {
   const authToken = req.headers.authorization.slice(7);
   try {
     const decoded = await verifyJWT(authToken, privateKey);
-    if (decoded){
+    if (decoded) {
       req.user = decoded.data;
-      next()
+      next();
     }
   } catch (err) {
     next(err);

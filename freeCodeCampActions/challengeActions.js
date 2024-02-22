@@ -1,20 +1,15 @@
 import axios from "axios";
-import {
-  BASE_URL,
-  API_BASE_URL,
-  dev_cookie,
-  demoChallengeCompleteCookie,
-} from "../constants.js";
+import { BASE_URL, API_BASE_URL } from "../constants.js";
 import { jsonReader } from "../utils/dbUtils.js";
 import rootDir from "app-root-path";
 import { pause } from "../utils/utils.js";
 
 const COURSES_STORE = rootDir.resolve("/store/allCourses.json");
 
-export function getAllCourseChallenges(coursePath) {
+export function getAllCourseChallenges(app_data_cookie, coursePath) {
   return new Promise((resolve, reject) => {
     if (coursePath) {
-      fetchCourseChallenges(coursePath).then((singleCourseChallenges) => {
+      fetchCourseChallenges(app_data_cookie, coursePath).then((singleCourseChallenges) => {
         resolve(singleCourseChallenges);
       });
     } else {
@@ -22,7 +17,7 @@ export function getAllCourseChallenges(coursePath) {
         if (err) reject(err);
         Promise.all(
           courses.map((course) => {
-            return pause(100).then(() => fetchCourseChallenges(course.path));
+            return pause(100).then(() => fetchCourseChallenges(app_data_cookie, course.path));
           })
         ).then((allCoursesChallenges) => resolve(allCoursesChallenges));
       });
@@ -30,12 +25,12 @@ export function getAllCourseChallenges(coursePath) {
   });
 }
 
-async function fetchCourseChallenges(coursePath) {
+async function fetchCourseChallenges(app_data_cookie, coursePath) {
   return new Promise((resolve, reject) => {
     axios
       .get(`${BASE_URL}${coursePath}`, {
         headers: {
-          Cookie: dev_cookie,
+          Cookie: app_data_cookie,
           "Content-Type": "application/json",
         },
       })
@@ -69,22 +64,17 @@ async function fetchCourseChallenges(coursePath) {
 //   console.log(allChallenges);
 // })();
 
-export async function completeChallenge({ id, challengeType }) {
+export async function completeChallenge({ id, challengeType }, user_session_cookie) {
   const challengeCompletePath = "/modern-challenge-completed";
-  const csrf_token_Start = demoChallengeCompleteCookie.indexOf("csrf_token=");
-  const csrf_token_End = demoChallengeCompleteCookie.indexOf(
-    ";",
-    csrf_token_Start
-  );
-  const csrf_token = demoChallengeCompleteCookie
-    .slice(csrf_token_Start, csrf_token_End)
-    .slice("11");
+  const csrf_token_Start = user_session_cookie.indexOf("csrf_token=");
+  const csrf_token_End = user_session_cookie.indexOf(";", csrf_token_Start);
+  const csrf_token = user_session_cookie.slice(csrf_token_Start, csrf_token_End).slice("11");
   return axios.post(
     `${API_BASE_URL}${challengeCompletePath}`,
     { challengeType, id },
     {
       headers: {
-        Cookie: demoChallengeCompleteCookie,
+        Cookie: user_session_cookie,
         "Content-Type": "application/json",
         "Csrf-Token": csrf_token,
       },

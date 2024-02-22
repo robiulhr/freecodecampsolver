@@ -17,12 +17,13 @@ export const insertUserData = async (newUser) => {
       if (users === undefined) {
         users = [];
       }
-      const alreadyPresent = users.findIndex(
-        (user) => user.userName === newUser.userName
-      );
+      const alreadyPresent = users.findIndex((user) => user.userName === newUser.userName);
       if (typeof alreadyPresent !== "number" || alreadyPresent < 0) {
         users.push(newUser);
-      } else reject({ message: "this user already present." });
+      } else {
+        // login the user again.
+        users[alreadyPresent] = newUser;
+      }
       // write the updated users array to the store
       await fs
         .writeFile(USER_STORE, JSON.stringify(users))
@@ -46,6 +47,7 @@ export const readUserData = async (userId) => {
       }
       if (userId) {
         const user = users.filter((user) => user.id === userId);
+        if (user.length === 0) reject({ message: "no user found." });
         resolve(user);
       }
     });
@@ -99,10 +101,7 @@ export const addCompletedChallanges = async (id, completedChallenges) => {
     if (id) {
       const userIndex = users.findIndex((user) => user.id === id);
       const alreadyCompletedChallenges = users[userIndex].completedChallenges;
-      users[userIndex].completedChallenges = [
-        ...alreadyCompletedChallenges,
-        ...completedChallenges,
-      ];
+      users[userIndex].completedChallenges = [...alreadyCompletedChallenges, ...completedChallenges];
       // write the updated users array to the store
       await fs
         .writeFile(USER_STORE, JSON.stringify(users))

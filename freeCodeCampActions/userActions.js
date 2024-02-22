@@ -1,14 +1,14 @@
-import {  API_BASE_URL } from "../constants.js";
+import { API_BASE_URL } from "../constants.js";
 import axios from "axios";
 
-export function getUserData(cookie) {
+export function getUserData(app_data_cookie) {
   const userDataPath = "/user/get-session-user";
   let finalUser;
   return new Promise(async (resole, reject) => {
     await axios
       .get(`${API_BASE_URL}${userDataPath}`, {
         headers: {
-          Cookie: cookie,
+          Cookie: app_data_cookie,
           "Content-Type": "application/json",
         },
       })
