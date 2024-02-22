@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import rootDir from "app-root-path";
-import { jsonReader } from "./utils.js";
-import { getAllCourseChallenges } from "../serverActions/challengeActions.js";
+import { jsonReader } from "../utils/dbUtils.js";
+import {getAllCourseChallenges} from '../freeCodeCampActions/challengeActions.js'  
 
 const CHALLENGES_STORE = rootDir.resolve("/store/allChallenges.json");
 

@@ -1,7 +1,7 @@
 import { algorithm, cookieChecker, privateKey } from "../../constants.js";
 import { insertUserData } from "../../dbActions/userActions.js";
 import { generateJWT } from "../../utils/jwtToken.js";
-import { getUserData } from "../../serverActions/userActions.js";
+import { getUserData } from "../../freeCodeCampActions/userActions.js";
 
 export default async function loginController(req, res, next) {
   const data = req.body;

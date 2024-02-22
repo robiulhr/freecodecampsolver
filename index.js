@@ -6,6 +6,9 @@ import getUserController from "./controllers/user/getUser.js";
 import isAuthenticated from "./middlewares/isAuthenticated.js";
 import getAllCoursesController from "./controllers/courses/getAllCourses.js";
 import fetchChallengesController from "./controllers/devControllers/fetchChallengesController.js";
+import getSingleCourseChallengesController from "./controllers/challenge/getSingleCourseChallenges.js";
+import getAllCourseChallengesController from "./controllers/challenge/allCourseChallenges.js";
+import completeChallengesController from "./controllers/challenge/completeChallenges.js";
 env.config();
 
 const app = express();
@@ -25,28 +28,32 @@ app.get("/", (req, res) => {
 app.get("/user", isAuthenticated, getUserController);
 
 // delete user
-app.delete("user",(req,res)=>{})
-
+// app.delete("user", (req, res) => {});
 
 // get all courses data
-app.get("/courses",isAuthenticated, getAllCoursesController);
+app.get("/courses", isAuthenticated, getAllCoursesController);
 
-// get single course data
-app.get("/courses/:id", (req, res) => {});
+// get all course challenges
+app.get("/challenges", isAuthenticated, getAllCourseChallengesController);
+// get single course challenges
+app.get(
+  "/challenges/:path",
+  isAuthenticated,
+  getSingleCourseChallengesController
+);
 
 // complete challenge
-app.post("/completechallenge/", (req, res) => {});
+app.post("/completechallenges/", isAuthenticated, completeChallengesController);
 
 // login the user getting the data from freecodecamp server and saving it on the server
 app.post("/login", loginController);
-
 
 /**
  * routes for development purpose only
  * must be passed the development passkey as the authorization key.
  */
 
-app.get("/fetchallchallenges",fetchChallengesController);
+app.get("/fetchallchallenges", fetchChallengesController);
 
 // Catch-all route for handling undefined routes
 app.all("*", (req, res) => {

@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import rootDir from "app-root-path";
 import { v4 as uuidv4 } from "uuid";
-import { jsonReader } from "./utils.js";
+import { jsonReader } from "../utils/dbUtils.js";
 
 const USER_STORE = rootDir.resolve("/store/users.json");
 
