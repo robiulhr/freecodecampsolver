@@ -1,8 +1,13 @@
 import { Box, Button, Typography } from "@mui/material";
 import logo from "../../assets/logo-512X512.png";
 import TextField from "@mui/material/TextField";
+import { useState } from "react";
 
 export default function Login() {
+  const [userSessionCookie, setUserSessionCookie] = useState("");
+  const [pageDataCookie, setPageDataCookie] = useState("");
+  const [loading, setLoading] = useState("");
+  const [error, setError] = useState("");
   return (
     <Box sx={{ background: "#d0d0d5", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
       <Box sx={{ border: "3px solid #0a0a23", padding: "30px", boxShadow: "0 12px 40px rgba(0, 0, 0, 0.12)", background: "#fff", marginTop: "70px", marginBottom: "30px" }}>
